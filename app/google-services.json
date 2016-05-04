@@ -1,0 +1,61 @@
+{
+  "project_info": {
+    "project_number": "1004887338930",
+    "project_id": "custom-force-130021"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1004887338930:android:b752a159fe5a6e28",
+        "android_client_info": {
+          "package_name": "com.ereinecke.location"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8TYy09-b6MWMYNDzol7eGYQQeI9Ei3fQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1004887338930:android:3be26a5e0cb0b2ff",
+        "android_client_info": {
+          "package_name": "com.ereinecke.location.location"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8TYy09-b6MWMYNDzol7eGYQQeI9Ei3fQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
