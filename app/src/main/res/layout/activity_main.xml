@@ -9,39 +9,89 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ereinecke.location.location.MainActivity">
 
-    <TextView
-        android:id="@+id/latView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Latitude"
-        android:textSize="@dimen/abc_text_size_display_1_material" />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/longView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Longitude"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="false"
-        android:layout_below="@+id/latView"
-        android:textSize="@dimen/abc_text_size_display_1_material" />
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/altitudeView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Altitude"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="false"
-        android:layout_below="@+id/longView"
-        android:textSize="@dimen/abc_text_size_display_1_material" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/latitude"
+                android:id="@+id/textView"
+                android:layout_marginRight="8dp"
+                android:paddingEnd="8dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/warningView"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/altitudeView"
-        android:textSize="@dimen/abc_text_size_body_1_material" />
+            <TextView
+                android:id="@+id/latView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/latitude"
+                android:textSize="@dimen/abc_text_size_display_1_material" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/longitude"
+                android:id="@+id/longLabel"
+                android:paddingEnd="8dp" />
+
+            <TextView
+                android:id="@+id/longView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/longitude"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="false"
+                android:layout_below="@+id/latView"
+                android:textSize="@dimen/abc_text_size_display_1_material" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/altitude"
+                android:id="@+id/altitudeLabel"
+                android:layout_marginRight="8dp" />
+
+            <TextView
+                android:id="@+id/altitudeView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/altitude"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="false"
+                android:layout_below="@+id/longView"
+                android:textSize="@dimen/abc_text_size_display_1_material" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/statusView"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/altitudeView"
+                android:textSize="@dimen/abc_text_size_body_1_material" />
+        </TableRow>
+    </TableLayout>
 
 </RelativeLayout>

@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements
     private TextView latitudeView;
     private TextView longitudeView;
     private TextView altitudeView;
-    private TextView warningView;
+    private TextView statusView;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private LocationManager mLocationManager;
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements
         latitudeView = (TextView) findViewById(R.id.latView);
         longitudeView = (TextView) findViewById(R.id.longView);
         altitudeView = (TextView) findViewById(R.id.altitudeView);
-        warningView = (TextView) findViewById(R.id.warningView);
+        statusView = (TextView) findViewById(R.id.warningView);
 
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements
             latitudeView.setText(Double.toString(location.getLatitude()));
             longitudeView.setText(Double.toString(location.getLongitude()));
             altitudeView.setText(Double.toString(location.getAltitude()));
-            warningView.setText(getResources().getText(R.string.last_location_warning));
+            statusView.setText(getResources().getText(R.string.last_location_warning));
         }
     }
 
@@ -113,6 +113,6 @@ public class MainActivity extends AppCompatActivity implements
         longitudeView.setText(Double.toString(location.getLongitude()));
         altitudeView.setText(Double.toString(location.getAltitude()));
         // Show time since update
-        warningView.setText("Live update");
+        statusView.setText("Live update");
     }
 }
