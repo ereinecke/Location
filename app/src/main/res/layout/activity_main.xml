@@ -10,8 +10,11 @@
     tools:context="com.ereinecke.location.location.MainActivity">
 
     <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/table_layout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true">
 
         <TableRow
             android:layout_width="match_parent"
@@ -23,14 +26,16 @@
                 android:text="@string/latitude"
                 android:id="@+id/textView"
                 android:layout_marginRight="8dp"
-                android:paddingEnd="8dp" />
+                android:paddingEnd="8dp"
+                android:textSize="@dimen/label_size" />
 
             <TextView
                 android:id="@+id/latView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/latitude"
-                android:textSize="@dimen/abc_text_size_display_1_material" />
+                android:textSize="@dimen/result_size"
+                android:textAlignment="viewEnd" />
 
         </TableRow>
 
@@ -43,7 +48,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/longitude"
                 android:id="@+id/longLabel"
-                android:paddingEnd="8dp" />
+                android:paddingEnd="8dp"
+                android:textSize="@dimen/label_size" />
 
             <TextView
                 android:id="@+id/longView"
@@ -53,7 +59,8 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="false"
                 android:layout_below="@+id/latView"
-                android:textSize="@dimen/abc_text_size_display_1_material" />
+                android:textSize="@dimen/result_size"
+                android:textAlignment="viewEnd" />
 
         </TableRow>
 
@@ -66,7 +73,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/altitude"
                 android:id="@+id/altitudeLabel"
-                android:layout_marginRight="8dp" />
+                android:layout_marginRight="8dp"
+                android:textSize="@dimen/label_size" />
 
             <TextView
                 android:id="@+id/altitudeView"
@@ -76,7 +84,8 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="false"
                 android:layout_below="@+id/longView"
-                android:textSize="@dimen/abc_text_size_display_1_material" />
+                android:textSize="@dimen/result_size"
+                android:textAlignment="viewEnd" />
 
         </TableRow>
 
@@ -90,8 +99,49 @@
                 android:id="@+id/statusView"
                 android:layout_alignParentStart="true"
                 android:layout_below="@+id/altitudeView"
-                android:textSize="@dimen/abc_text_size_body_1_material" />
+                android:textSize="@dimen/label_size"
+                android:paddingLeft="8dp"
+                android:paddingTop="8dp" />
+
         </TableRow>
     </TableLayout>
+
+    <Button
+        android:id="@+id/request_activity_updates_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:onClick="requestActivityUpdatesButtonHandler"
+        android:text="@string/request_activity_updates"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentStart="false"
+        android:paddingLeft="@dimen/abc_button_padding_horizontal_material"
+        android:paddingRight="@dimen/abc_button_padding_horizontal_material"
+        android:paddingTop="@dimen/abc_button_padding_vertical_material"
+        android:paddingBottom="@dimen/abc_button_padding_vertical_material"
+        android:layout_below="@+id/table_layout"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/remove_activity_updates_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="false"
+        android:onClick="removeActivityUpdatesButtonHandler"
+        android:text="@string/remove_activity_updates"
+        android:layout_toRightOf="@+id/request_activity_updates_button"
+        android:layout_marginLeft="24dp"
+        android:layout_below="@+id/table_layout"
+        android:layout_marginTop="16dp" />
+    <TextView
+        android:id="@+id/detectedActivities"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/detected_activities_title"
+        android:layout_column="18"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/request_activity_updates_button"
+        android:layout_marginTop="16dp" />
 
 </RelativeLayout>
