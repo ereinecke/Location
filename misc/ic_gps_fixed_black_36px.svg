@@ -5,7 +5,7 @@
 	 viewBox="0 0 36 36" style="enable-background:new 0 0 36 36;" xml:space="preserve">
 <style type="text/css">
 	.st0{display:none;fill:#000002;}
-	.st1{opacity:0.5;fill:#7F7F7F;}
+	.st1{opacity:0.5;fill:#FFFFFF;enable-background:new    ;}
 </style>
 <path class="st0" d="M0,0h36v36H0V0z"/>
 <circle class="st1" cx="18" cy="18" r="18"/>

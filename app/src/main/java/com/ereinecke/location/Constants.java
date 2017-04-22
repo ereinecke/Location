@@ -1,4 +1,4 @@
-package com.ereinecke.location.location;
+package com.ereinecke.location;
 
 /*
  * Copyright (C) 2015 The Android Open Source Project
@@ -26,7 +26,7 @@ public final class Constants {
     private Constants() {
     }
 
-    public static final String PACKAGE_NAME = "com.ereinecke.location.location";
+    public static final String PACKAGE_NAME = "com.ereinecke.location";
     // public static final String PACKAGE_NAME = "com.google.android.gms.location.activityrecognition";
 
     public static final String BROADCAST_ACTION = PACKAGE_NAME + ".BROADCAST_ACTION";

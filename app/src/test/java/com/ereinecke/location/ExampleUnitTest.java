@@ -1,4 +1,4 @@
-package com.ereinecke.location.location;
+package com.ereinecke.location;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.ereinecke.location.location;
+package com.ereinecke.location;
 
 import android.Manifest;
 import android.app.PendingIntent;

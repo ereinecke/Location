@@ -1,4 +1,4 @@
-package com.ereinecke.location.location;
+package com.ereinecke.location;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

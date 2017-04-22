@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "com.ereinecke.location.location"
+        applicationId "com.ereinecke.location"
         minSdkVersion 17
         targetSdkVersion 23
         versionCode 1
