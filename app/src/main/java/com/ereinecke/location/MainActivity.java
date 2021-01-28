@@ -1,7 +1,23 @@
+/*
+      Main Activity for Location app
+      Substantial code from https://github.com/android/location-samples
+      <p>
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+      <p>
+      http://www.apache.org/licenses/LICENSE-2.0
+      <p>
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+ */
+
 package com.ereinecke.location;
 
 import android.Manifest;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,48 +26,59 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
-        GooglePlayServicesClient.OnConnectionFailedListener, GooglePlayServicesClient.ConnectionCallbacks,
         LocationListener, ResultCallback<Status> {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34; // ??
     private final long INTERVAL = 5000; // msec
     private final long MIN_TIME = 5000; // msec
     private final float MIN_DISTANCE = 20; // meters
+    private String mLatitudeLabel;
+    private String mLongitudeLabel;
+    private TextView mLatitudeText;
+    private TextView mLongitudeText;
     private TextView latitudeView;
     private TextView longitudeView;
     private TextView altitudeView;
     private TextView statusView;
     private TextView activitiesView;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private ActivityRecognitionClient mActivityRecognitionClient;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private LocationManager mLocationManager;
+    protected Location mLastLocation;
     private Button requestUpdatesButton;
     private Button removeUpdatesButton;
     protected ActivityDetectionBroadcastReceiver mBroadcastReceiver;
@@ -72,22 +99,25 @@ public class MainActivity extends AppCompatActivity implements
 
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        /*
+        requestActivityUpdates(this);
+        /*
         mBroadcastReceiver = new ActivityDetectionBroadcastReceiver();
+        */
 
-        buildGoogleApiClient();
         }
-
+    /*
     public void requestActivityUpdatesButtonHandler(View view) {
         if (!mGoogleApiClient.isConnected()) {
             Toast.makeText(this, getString(R.string.not_connected),
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(
-                mGoogleApiClient,
-                Constants.DETECTION_INTERVAL_IN_MILLISECONDS,
-                getActivityDetectionPendingIntent())
-                .setResultCallback(this);
+
+        requestActivityUpdates(this);
+
         requestUpdatesButton.setEnabled(false);
         removeUpdatesButton.setEnabled(true);
 
@@ -108,6 +138,86 @@ public class MainActivity extends AppCompatActivity implements
         removeUpdatesButton.setEnabled(false);
     }
 
+    void requestActivityUpdates(final Context context) {
+        ActivityTransitionRequest request = buildTransitionRequest();
+        PendingIntent pendingIntent = null;
+        ArrayList detectedActivityList = null;
+
+        Task task = ActivityRecognition.getClient(context)
+                .requestActivityUpdates(INTERVAL, pendingIntent);
+
+        task.addOnSuccessListener(
+                new OnSuccessListener(new OnSuccessListener<>()) {
+                    @Override
+                    public void onSuccess(Void result) {
+                       pendingIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivityList);// Handle success...
+                    }
+                });
+        task.addOnFailureListener(
+                new OnFailureListener() {
+                    @Override
+                    public void onFailure(Exception e) {
+                        // Handle failure...
+                        Log.d(LOG_TAG, "Exception in requestAtivityUpdates" + e);
+                    }
+                });
+    }
+
+    ActivityTransitionRequest buildTransitionRequest() {
+        List transitions = new ArrayList<>();
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.ON_FOOT)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.ON_FOOT)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.ON_BICYCLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.ON_BICYCLE)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.RUNNING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.RUNNING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.STILL)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.STILL)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+        Log.d(LOG_TAG, transitions.toString());
+        return new ActivityTransitionRequest(transitions);
+    }
+
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -124,6 +234,127 @@ public class MainActivity extends AppCompatActivity implements
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
         // requestActivityUpdates() and removeActivityUpdates().
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+     */
+
+    /**
+     * Provides a simple way of getting a device's location and is well suited for
+     * applications that do not require a fine-grained location and that do not need location
+     * updates. Gets the best and most recent location currently available, which may be null
+     * in rare cases when a location is not available.
+     *
+     * Note: this method should be called after location permission has been granted.
+     */
+    @SuppressWarnings("MissingPermission")
+    private void getLastLocation() {
+        mFusedLocationClient.getLastLocation()
+                .addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            mLastLocation = task.getResult();
+
+                            Log.d(LOG_TAG, "Last known location: " + mLastLocation.toString());
+                            latitudeView.setText(getResources().getString(R.string.lat_long_result, mLastLocation.getLatitude()));
+                            longitudeView.setText(getResources().getString(R.string.lat_long_result, mLastLocation.getLongitude()));
+                            setAltitude(mLastLocation.getAltitude());
+                            statusView.setText(getResources().getText(R.string.last_location_warning));
+                        } else {
+                            Log.w(LOG_TAG, "getLastLocation:exception", task.getException());
+                            showSnackbar(getString(R.string.no_location_detected));
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Return the current state of the permissions needed.
+     */
+    private boolean checkPermissions() {
+        int permissionState = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        return permissionState == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void startLocationPermissionRequest() {
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_PERMISSIONS_REQUEST_CODE);
+    }
+
+    private void requestPermissions() {
+        boolean shouldProvideRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION);
+
+        // Provide an additional rationale to the user. This would happen if the user denied the
+        // request previously, but didn't check the "Don't ask again" checkbox.
+        if (shouldProvideRationale) {
+            Log.i(LOG_TAG, "Displaying permission rationale to provide additional context.");
+
+            showSnackbar(R.string.permission_rationale, android.R.string.ok,
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // Request permission
+                            startLocationPermissionRequest();
+                        }
+                    });
+
+        } else {
+            Log.i(LOG_TAG, "Requesting permission");
+            // Request permission. It's possible this can be auto answered if device policy
+            // sets the permission in a given state or the user denied the permission
+            // previously and checked "Never ask again".
+            startLocationPermissionRequest();
+        }
+    }
+
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        Log.i(LOG_TAG, "onRequestPermissionResult");
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length <= 0) {
+                // If user interaction was interrupted, the permission request is cancelled and you
+                // receive empty arrays.
+                Log.i(LOG_TAG, "User interaction was cancelled.");
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted.
+                getLastLocation();
+            } else {
+                // Permission denied.
+
+                // Notify the user via a SnackBar that they have rejected a core permission for the
+                // app, which makes the Activity useless. In a real app, core permissions would
+                // typically be best requested during a welcome-screen flow.
+
+                // Additionally, it is important to remember that a permission might have been
+                // rejected without asking the user for permission (device policy or "Never ask
+                // again" prompts). Therefore, a user interface affordance is typically implemented
+                // when permissions are denied. Otherwise, your app could appear unresponsive to
+                // touches or interactions which have required permissions.
+                showSnackbar(R.string.permission_denied_explanation, R.string.settings,
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // Build intent that displays the App settings screen.
+                                Intent intent = new Intent();
+                                intent.setAction(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package",
+                                        BuildConfig.APPLICATION_ID, null);
+                                intent.setData(uri);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        });
+            }
+        }
     }
 
     @Override
@@ -151,7 +382,13 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+
+        if (!checkPermissions()) {
+            requestPermissions();
+        } else {
+            getLastLocation();
+        }
+        // mGoogleApiClient.connect();
     }
 
     @Override
@@ -178,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onPause();
     }
 
+    /*
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "Connected to Location Services");
@@ -191,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+            FusedLocationProviderClient.requestLocationUpdates(mGoogleApiClient,
                     mLocationRequest, this);
         } else {
             // TODO: need to request permissions with API > 23
@@ -206,6 +444,8 @@ public class MainActivity extends AppCompatActivity implements
             setAltitude(mLastLocation.getAltitude());
             statusView.setText(getResources().getText(R.string.last_location_warning));
         }
+
+        requestActivityUpdates(this);
     }
 
     @Override
@@ -219,6 +459,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(LOG_TAG, "Connection to Location Services suspended.");
         mGoogleApiClient.connect();
     }
+    */
 
     public void onResult(Status status) {
         if (status.isSuccess()) {
@@ -300,5 +541,32 @@ public class MainActivity extends AppCompatActivity implements
             }
             activitiesView.setText(strStatus);
         }
+    }
+
+    /**
+     * Shows a {@link Snackbar} using {@code text}.
+     *
+     * @param text The Snackbar text.
+     */
+    private void showSnackbar(final String text) {
+        View container = findViewById(R.id.main_activity_container);
+        if (container != null) {
+            Snackbar.make(container, text, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Shows a {@link Snackbar}.
+     *
+     * @param mainTextStringId The id for the string resource for the Snackbar text.
+     * @param actionStringId   The text of the action item.
+     * @param listener         The listener associated with the Snackbar action.
+     */
+    private void showSnackbar(final int mainTextStringId, final int actionStringId,
+                              View.OnClickListener listener) {
+        Snackbar.make(findViewById(android.R.id.content),
+                getString(mainTextStringId),
+                Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(actionStringId), listener).show();
     }
 }
