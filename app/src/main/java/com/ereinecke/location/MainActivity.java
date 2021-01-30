@@ -18,15 +18,16 @@
 package com.ereinecke.location;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.icu.text.DateFormat;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -36,25 +37,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionClient;
+import com.google.android.gms.location.ActivityTransition;
+import com.google.android.gms.location.ActivityTransitionRequest;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static java.lang.Math.floor;
 
 public class MainActivity extends AppCompatActivity implements
         LocationListener, ResultCallback<Status> {
@@ -64,24 +73,20 @@ public class MainActivity extends AppCompatActivity implements
     private final long INTERVAL = 5000; // msec
     private final long MIN_TIME = 5000; // msec
     private final float MIN_DISTANCE = 20; // meters
-    private String mLatitudeLabel;
-    private String mLongitudeLabel;
-    private TextView mLatitudeText;
-    private TextView mLongitudeText;
     private TextView latitudeView;
     private TextView longitudeView;
     private TextView altitudeView;
+    private TextView bearingView;
     private TextView statusView;
     private TextView activitiesView;
     private FusedLocationProviderClient mFusedLocationClient;
     private ActivityRecognitionClient mActivityRecognitionClient;
     private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
     private LocationManager mLocationManager;
     protected Location mLastLocation;
+    private PendingIntent pendingIntent;
     private Button requestUpdatesButton;
     private Button removeUpdatesButton;
-    protected ActivityDetectionBroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,39 +96,42 @@ public class MainActivity extends AppCompatActivity implements
         latitudeView = (TextView) findViewById(R.id.latView);
         longitudeView = (TextView) findViewById(R.id.longView);
         altitudeView = (TextView) findViewById(R.id.altitudeView);
+        bearingView = (TextView) findViewById(R.id.bearingView);
         statusView = (TextView) findViewById(R.id.statusView);
         activitiesView = (TextView) findViewById(R.id.detectedActivities);
 
         requestUpdatesButton = (Button) findViewById(R.id.request_activity_updates_button);
         removeUpdatesButton  = (Button) findViewById(R.id.remove_activity_updates_button);
 
+        /* not used?
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
+         */
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         /*
-        requestActivityUpdates(this);
-        /*
-        mBroadcastReceiver = new ActivityDetectionBroadcastReceiver();
+        requestActivityTransitionUpdates(this);
         */
 
         }
-    /*
+
     public void requestActivityUpdatesButtonHandler(View view) {
+        /*
         if (!mGoogleApiClient.isConnected()) {
+            // TODO: Convert Toasts to Snackbars
             Toast.makeText(this, getString(R.string.not_connected),
                     Toast.LENGTH_SHORT).show();
             return;
         }
 
         requestActivityUpdates(this);
-
+        */
         requestUpdatesButton.setEnabled(false);
         removeUpdatesButton.setEnabled(true);
 
     }
 
     public void removeActivityUpdatesButtonHandler(View view) {
+        /*
         if (!mGoogleApiClient.isConnected()) {
             Toast.makeText(this, getString(R.string.not_connected), Toast.LENGTH_SHORT).show();
             return;
@@ -134,23 +142,26 @@ public class MainActivity extends AppCompatActivity implements
                 mGoogleApiClient,
                 getActivityDetectionPendingIntent())
                 .setResultCallback(this);
+        */
         requestUpdatesButton.setEnabled(true);
         removeUpdatesButton.setEnabled(false);
     }
 
-    void requestActivityUpdates(final Context context) {
+    void requestActivityTransitionUpdates(final Context context) {
         ActivityTransitionRequest request = buildTransitionRequest();
-        PendingIntent pendingIntent = null;
+
         ArrayList detectedActivityList = null;
 
         Task task = ActivityRecognition.getClient(context)
                 .requestActivityUpdates(INTERVAL, pendingIntent);
 
         task.addOnSuccessListener(
-                new OnSuccessListener(new OnSuccessListener<>()) {
+                new OnSuccessListener() {
                     @Override
-                    public void onSuccess(Void result) {
+                    public void onSuccess(Object o) {
+                         /* Update UI with latest info
                        pendingIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivityList);// Handle success...
+                         */
                     }
                 });
         task.addOnFailureListener(
@@ -219,13 +230,14 @@ public class MainActivity extends AppCompatActivity implements
 
 
     protected synchronized void buildGoogleApiClient() {
+        /*
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
+    */
     }
 
     private PendingIntent getActivityDetectionPendingIntent() {
@@ -236,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-     */
+
 
     /**
      * Provides a simple way of getting a device's location and is well suited for
@@ -250,16 +262,26 @@ public class MainActivity extends AppCompatActivity implements
     private void getLastLocation() {
         mFusedLocationClient.getLastLocation()
                 .addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful() && task.getResult() != null) {
+                            // Get location and time stamp
                             mLastLocation = task.getResult();
+                            Log.d(LOG_TAG, "Location object: " + mLastLocation.toString());
+                            Date dateStamp = new Date(mLastLocation.getTime());
+                            String dateStr = DateFormat.getDateTimeInstance().format(dateStamp);
 
+                            // Set location data in textviews
                             Log.d(LOG_TAG, "Last known location: " + mLastLocation.toString());
-                            latitudeView.setText(getResources().getString(R.string.lat_long_result, mLastLocation.getLatitude()));
-                            longitudeView.setText(getResources().getString(R.string.lat_long_result, mLastLocation.getLongitude()));
-                            setAltitude(mLastLocation.getAltitude());
-                            statusView.setText(getResources().getText(R.string.last_location_warning));
+                            latitudeView.setText(getResources().getString(R.string.lat_long_result,
+                                    mLastLocation.getLatitude()));
+                            longitudeView.setText(getResources().getString(R.string.lat_long_result,
+                                    mLastLocation.getLongitude()));
+                            altitudeView.setText(formatAltitude(mLastLocation.getAltitude()));
+                            bearingView.setText(formatBearing(mLastLocation.getBearing()));
+                            dateStr = getResources().getText(R.string.live_update) + dateStr;
+                            statusView.setText(dateStr);
                         } else {
                             Log.w(LOG_TAG, "getLastLocation:exception", task.getException());
                             showSnackbar(getString(R.string.no_location_detected));
@@ -394,72 +416,23 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
+        if (mGoogleApiClient != null) {
+            if (mGoogleApiClient.isConnected()) {
+                mGoogleApiClient.disconnect();
+            }
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Register the broadcast receiver that informs this activity of the DetectedActivity
-        // object broadcast sent by the intent service.
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(Constants.BROADCAST_ACTION));
     }
 
     @Override
     public void onPause() {
-        // Unregister the broadcast receiver that was registered during onResume()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         super.onPause();
     }
 
-    /*
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.d(LOG_TAG, "Connected to Location Services");
-        // Create a location request called mLocationRequest
-        mLocationRequest = LocationRequest.create();
-        // Set its priority to high accuracy
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        // Update every second (1000 ms)
-        mLocationRequest.setInterval(INTERVAL);
-        // Call requestLocationUpdates in the API with this request
-
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            FusedLocationProviderClient.requestLocationUpdates(mGoogleApiClient,
-                    mLocationRequest, this);
-        } else {
-            // TODO: need to request permissions with API > 23
-            Log.d(LOG_TAG, "failed permission check");
-        }
-        // Start with last known location
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            Log.d(LOG_TAG, "Last known location: " + mLastLocation.toString());
-            latitudeView.setText(getResources().getString(R.string.lat_long_result, mLastLocation.getLatitude()));
-            longitudeView.setText(getResources().getString(R.string.lat_long_result, mLastLocation.getLongitude()));
-            setAltitude(mLastLocation.getAltitude());
-            statusView.setText(getResources().getText(R.string.last_location_warning));
-        }
-
-        requestActivityUpdates(this);
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "Connection to Location Services failed, error: " +
-                connectionResult.getErrorCode());
-    }
-
-    @Override
-    public void onConnectionSuspended(int result) {
-        Log.d(LOG_TAG, "Connection to Location Services suspended.");
-        mGoogleApiClient.connect();
-    }
-    */
 
     public void onResult(Status status) {
         if (status.isSuccess()) {
@@ -469,14 +442,23 @@ public class MainActivity extends AppCompatActivity implements
                 status.getStatusMessage());
         }
     }
+
     @Override
-    public void onLocationChanged(Location location) {
-        // Log.d(LOG_TAG, location.toString());
-        latitudeView.setText(getResources().getString(R.string.lat_long_result, location.getLatitude()));
-        longitudeView.setText(getResources().getString(R.string.lat_long_result, location.getLongitude()));
-        setAltitude(location.getAltitude());
-        // Show time since update
-        statusView.setText("Live update");
+    public void onLocationChanged(@NonNull Location location) {
+        // TODO: factor this out to displayLocation(Location location)
+        // Here and in getLastLocation?
+        Date dateStamp = new Date(mLastLocation.getTime());
+        String dateStr = DateFormat.getDateTimeInstance().format(dateStamp);
+
+        Log.d(LOG_TAG, "Last known location: " + mLastLocation.toString());
+        latitudeView.setText(getResources().getString(R.string.lat_long_result,
+                mLastLocation.getLatitude()));
+        longitudeView.setText(getResources().getString(R.string.lat_long_result,
+                mLastLocation.getLongitude()));
+        altitudeView.setText(formatAltitude(mLastLocation.getAltitude()));
+        bearingView.setText(formatBearing(mLastLocation.getBearing()));
+        dateStr = getResources().getText(R.string.live_update) + dateStr;
+        statusView.setText(dateStr);
     }
 
     /**
@@ -506,41 +488,72 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void setAltitude(double altitude) {
+    /**
+     * Take altitude in meters and convert to a display string with meters and feet
+     *
+     * @param altitude
+     * @return string with altitude in meters and feet
+     */
+    private String formatAltitude(double altitude) {
+        String alt = "";
         if (altitude != 0) {
-            String alt = getResources().getString(R.string.altitude_result,
+            alt = getResources().getString(R.string.altitude_result,
                     altitude, metersToFeet(altitude));
-            Log.d(LOG_TAG, "Altitude:" + alt);
-            altitudeView.setText(alt);
         } else {
-            altitudeView.setText(getString(R.string.not_available));
+            alt = getString(R.string.not_available);
         }
+        Log.d(LOG_TAG, "Altitude: " + alt);
+        return alt;
+    }
+
+    /**
+     * Take bearing in degrees and convert to a display string with degrees and cardinal point
+     *
+     * @param bearing
+     * @return string with altitude in meters and feet
+     */
+    private String formatBearing(double bearing) {
+        String bear = getResources().getString(R.string.bearing_result,
+                bearing, bearingToCardinal(bearing));
+
+        Log.d(LOG_TAG, "Bearing: " + bear);
+        return bear;
+    }
+
+    /**
+     * Returns the string with the cardinal points to the third level
+     * (e.g. ENE).  The return sting will always have three char.
+     *
+     * @param bearing
+     * @return String with the alpha compass bearing to 16ths.
+     */
+    private String bearingToCardinal (double bearing) {
+        String cardinal;
+
+        switch ((int) floor(bearing/16)) {
+            case  0: cardinal = " N "; break;
+            case  1: cardinal = "NNE"; break;
+            case  2: cardinal = " NE"; break;
+            case  3: cardinal = "ENE"; break;
+            case  4: cardinal = " E "; break;
+            case  5: cardinal = "ESE"; break;
+            case  6: cardinal = " SE"; break;
+            case  7: cardinal = "SSE"; break;
+            case  8: cardinal = " S "; break;
+            case  9: cardinal = "SSW"; break;
+            case 10: cardinal = " SW"; break;
+            case 11: cardinal = "WSW"; break;
+            case 12: cardinal = " W "; break;
+            case 13: cardinal = "WNW"; break;
+            case 14: cardinal = " NW"; break;
+            case 15: cardinal = "NNW"; break;
+            default: cardinal = "";
+        }
+        return cardinal;
     }
 
     private double metersToFeet(double meters) {
         return meters * 3.28084;
-    }
-
-
-    /* Receiver for intents sent by DetectedActivitiesIntentService via a sendBroadcast().
-     * Receives a list of one or more DetectedActivity objects associated with with the
-     * current state of the device.
-     */
-    public class ActivityDetectionBroadcastReceiver extends BroadcastReceiver {
-        protected static final String TAG = "receiver";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            ArrayList<DetectedActivity> updatedActivities =
-                    intent.getParcelableArrayListExtra(Constants.ACTIVITY_EXTRA);
-
-            String strStatus = "";
-            for (DetectedActivity thisActivity: updatedActivities) {
-                strStatus += getActivityString(thisActivity.getType()) + ": " +
-                        thisActivity.getConfidence() + "%\n";
-            }
-            activitiesView.setText(strStatus);
-        }
     }
 
     /**

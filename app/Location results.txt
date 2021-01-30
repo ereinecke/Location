@@ -1,0 +1,10 @@
+Last known location from Pixel 4XL
+Location[fused 19.510519,-101.610959
+hAcc=20
+et=+19h18m11s467ms
+alt=2159.699951171875
+vAcc=1
+sAcc=???
+bAcc=???
+{Bundle[mParcelledData.dataSize=52]}]
+2021-01-28 08:57:52.993 7885-7885/com.ereinecke.location D/MainActivity: Altitude:2160 m (7086 ft)

@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.ereinecke.location"
-        minSdkVersion 17
+        minSdkVersion 24
         targetSdkVersion 30
         multiDexEnabled true
         versionCode 2
@@ -34,6 +34,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     testImplementation 'junit:junit:4.12'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
