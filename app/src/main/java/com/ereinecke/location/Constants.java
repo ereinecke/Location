@@ -27,7 +27,6 @@ public final class Constants {
     }
 
     public static final String PACKAGE_NAME = "com.ereinecke.location";
-    // public static final String PACKAGE_NAME = "com.google.android.gms.location.activityrecognition";
 
     public static final String BROADCAST_ACTION = PACKAGE_NAME + ".BROADCAST_ACTION";
 
